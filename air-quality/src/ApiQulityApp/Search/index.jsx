@@ -1,399 +1,3 @@
-// import {
-//   MapContainer,
-//   TileLayer,
-//   Marker,
-//   Popup,
-//   useMapEvents,
-// } from "react-leaflet";
-// import { useState } from "react";
-// import "leaflet/dist/leaflet.css";
-// import {
-//   Box,
-//   Typography,
-//   CircularProgress,
-// } from "@mui/material";
-
-// const ClickHandler = ({ onClick }) => {
-//   useMapEvents({
-//     click: (e) => {
-//       const { lat, lng } = e.latlng;
-//       onClick({ lat, lon: lng });
-//     },
-//   });
-//   return null;
-// };
-
-// const Search = () => {
-//   const [position, setPosition] = useState(null);
-//   const [airData, setAirData] = useState(null);
-//   const [loading, setLoading] = useState(false);
-
-//   const fetchWeather = async (coords) => {
-//     setLoading(true);
-//     try {
-
-//       const airRes = await fetch(
-//         `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${coords.lat}&longitude=${coords.lon}&hourly=pm10,pm2_5,carbon_monoxide,nitrogen_dioxide,sulphur_dioxide,ozone,us_aqi`
-//       );
-//       const airJson = await airRes.json();
-//       const index = 0;
-
-//       setAirData({
-//         aqi: airJson.hourly.us_aqi?.[index],
-//         pm25: airJson.hourly.pm2_5?.[index],
-//         pm10: airJson.hourly.pm10?.[index],
-//         co: airJson.hourly.carbon_monoxide?.[index],
-//         no2: airJson.hourly.nitrogen_dioxide?.[index],
-//         so2: airJson.hourly.sulphur_dioxide?.[index],
-//         o3: airJson.hourly.ozone?.[index],
-//       });
-//     } catch (error) {
-//       console.error("خطا در دریافت اطلاعات:", error);
-//       setAirData(null);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   const handleMapClick = (coords) => {
-//     setPosition(coords);
-//     fetchWeather(coords);
-//   };
-
-//   return (
-//     <>
-
-//       <Box sx={{
-//               mt: 4,
-//               display: "flex",
-//               flexDirection: { xs: "column", md: "row" },
-//               minHeight: "200px",
-//               borderRadius: 2,
-//               boxShadow: "0 0 10px 2px #4381C4",
-//               p: { xs: 2, md: 3 },
-//               gap: { xs: 2, md: 3 },
-//             }}>
-
-//         <Box  sx={{
-//                 width: { xs: "100%", md: "55%" },
-//                 height: { xs: "300px", md: "400px" },
-//                 pr: { xs: 0, md: 2 },
-//               }}>
-//           <MapContainer
-//             center={[35.6892, 51.389]}
-//             zoom={5}
-//             scrollWheelZoom={true}
-//             style={{ height: "100%", width: "100%" }}
-//           >
-//             <TileLayer
-//               attribution='&copy; <a href="https://openstreetmap.org">OpenStreetMap</a>'
-//               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-//             />
-
-//             <ClickHandler onClick={handleMapClick} />
-
-//             {position && (
-//               <Marker position={[position.lat, position.lon]}>
-//                 <Popup>
-//                   مختصات: {position.lat.toFixed(4)}, {position.lon.toFixed(4)}
-//                 </Popup>
-//               </Marker>
-//             )}
-//           </MapContainer>
-//         </Box>
-
-//         {loading && <CircularProgress />}
-
-//          {!loading && airData && (
-//               <Box
-//                 sx={{
-//                   width: { xs: "95%", md: "40%" },
-//                   minHeight: { xs: "auto", md: "100%" },
-//                   py: "15px",
-//                   px: "10px",
-//                 }}
-//               >
-//                 <Typography
-//                   variant="h6"
-//                   sx={{ textAlign: "center", color: "#4381C4" }}
-//                 >
-//                   Air Quality Information
-//                 </Typography>
-
-//                 <Box
-//                   component="table"
-//                   sx={{
-//                     width: "100%",
-//                     borderCollapse: "collapse",
-//                     margin: "20px 0",
-//                     fontFamily: "Arial, sans-serif",
-//                   }}
-//                 >
-//                   {airData &&  (
-//                     <>
-//                       <Box component="thead">
-//                         <Box component="tr" sx={{ backgroundColor: "#f5f5f5" }}>
-//                           <Box
-//                             component="th"
-//                             sx={{
-//                               padding: "12px 15px",
-//                               textAlign: "left",
-//                               borderBottom: "2px solid #ddd",
-//                               fontWeight: "bold",
-//                               color: "#4381C4",
-//                             }}
-//                           >
-//                             Parameter
-//                           </Box>
-//                           <Box
-//                             component="th"
-//                             sx={{
-//                               padding: "12px 15px",
-//                               textAlign: "left",
-//                               borderBottom: "2px solid #ddd",
-//                               fontWeight: "bold",
-//                               color: "#4381C4",
-//                             }}
-//                           >
-//                             Value
-//                           </Box>
-//                         </Box>
-//                       </Box>
-//                       <Box component="tbody">
-//                         <Box
-//                           component="tr"
-//                           sx={{
-//                             "&:nth-of-type(odd)": {
-//                               backgroundColor: "#f9f9f9",
-//                             },
-//                             "&:hover": { backgroundColor: "#f1f1f1" },
-//                           }}
-//                         >
-//                           <Box
-//                             component="td"
-//                             sx={{
-//                               padding: "12px 15px",
-//                               borderBottom: "1px solid #ddd",
-//                               fontWeight: "500",
-//                             }}
-//                           >
-//                             AQI
-//                           </Box>
-//                           <Box
-//                             component="td"
-//                             sx={{
-//                               padding: "12px 15px",
-//                               borderBottom: "1px solid #ddd",
-//                               color:
-//                                 airData.aqi <= 50
-//                                   ? "green"
-//                                   : airData.aqi <= 100
-//                                   ? "orange"
-//                                   : "red",
-//                               fontWeight: "bold",
-//                             }}
-//                           >
-//                             {airData.aqi ?? "--"}
-//                           </Box>
-//                         </Box>
-
-//                         <Box
-//                           component="tr"
-//                           sx={{
-//                             "&:nth-of-type(odd)": {
-//                               backgroundColor: "#f9f9f9",
-//                             },
-//                             "&:hover": { backgroundColor: "#f1f1f1" },
-//                           }}
-//                         >
-//                           <Box
-//                             component="td"
-//                             sx={{
-//                               padding: "12px 15px",
-//                               borderBottom: "1px solid #ddd",
-//                               fontWeight: "500",
-//                             }}
-//                           >
-//                             PM2.5
-//                           </Box>
-//                           <Box
-//                             component="td"
-//                             sx={{
-//                               padding: "12px 15px",
-//                               borderBottom: "1px solid #ddd",
-//                               color:
-//                                 airData.pm25 <= 12
-//                                   ? "green"
-//                                   : airData.pm25 <= 35.4
-//                                   ? "orange"
-//                                   : "red",
-//                               fontWeight: "bold",
-//                             }}
-//                           >
-//                             {airData.pm25 ?? "--"}
-//                           </Box>
-//                         </Box>
-
-//                         <Box
-//                           component="tr"
-//                           sx={{
-//                             "&:nth-of-type(odd)": {
-//                               backgroundColor: "#f9f9f9",
-//                             },
-//                             "&:hover": { backgroundColor: "#f1f1f1" },
-//                           }}
-//                         >
-//                           <Box
-//                             component="td"
-//                             sx={{
-//                               padding: "12px 15px",
-//                               borderBottom: "1px solid #ddd",
-//                               fontWeight: "500",
-//                             }}
-//                           >
-//                             PM10
-//                           </Box>
-//                           <Box
-//                             component="td"
-//                             sx={{
-//                               padding: "12px 15px",
-//                               borderBottom: "1px solid #ddd",
-//                               color:
-//                                 airData.pm10 <= 54
-//                                   ? "green"
-//                                   : airData.pm10 <= 154
-//                                   ? "orange"
-//                                   : "red",
-//                               fontWeight: "bold",
-//                             }}
-//                           >
-//                             {airData.pm10 ?? "--"}
-//                           </Box>
-//                         </Box>
-
-//                         <Box
-//                           component="tr"
-//                           sx={{
-//                             "&:nth-of-type(odd)": {
-//                               backgroundColor: "#f9f9f9",
-//                             },
-//                             "&:hover": { backgroundColor: "#f1f1f1" },
-//                           }}
-//                         >
-//                           <Box
-//                             component="td"
-//                             sx={{
-//                               padding: "12px 15px",
-//                               borderBottom: "1px solid #ddd",
-//                               fontWeight: "500",
-//                             }}
-//                           >
-//                             NO2
-//                           </Box>
-//                           <Box
-//                             component="td"
-//                             sx={{
-//                               padding: "12px 15px",
-//                               borderBottom: "1px solid #ddd",
-//                               color:
-//                                 airData.no2 <= 53
-//                                   ? "green"
-//                                   : airData.no2 <= 100
-//                                   ? "orange"
-//                                   : "red",
-//                               fontWeight: "bold",
-//                             }}
-//                           >
-//                             {airData.no2 ?? "--"}
-//                           </Box>
-//                         </Box>
-
-//                         <Box
-//                           component="tr"
-//                           sx={{
-//                             "&:nth-of-type(odd)": {
-//                               backgroundColor: "#f9f9f9",
-//                             },
-//                             "&:hover": { backgroundColor: "#f1f1f1" },
-//                           }}
-//                         >
-//                           <Box
-//                             component="td"
-//                             sx={{
-//                               padding: "12px 15px",
-//                               borderBottom: "1px solid #ddd",
-//                               fontWeight: "500",
-//                             }}
-//                           >
-//                             SO2
-//                           </Box>
-//                           <Box
-//                             component="td"
-//                             sx={{
-//                               padding: "12px 15px",
-//                               borderBottom: "1px solid #ddd",
-//                               color:
-//                                 airData.so2 <= 35
-//                                   ? "green"
-//                                   : airData.so2 <= 75
-//                                   ? "orange"
-//                                   : "red",
-//                               fontWeight: "bold",
-//                             }}
-//                           >
-//                             {airData.so2 ?? "--"}
-//                           </Box>
-//                         </Box>
-
-//                         <Box
-//                           component="tr"
-//                           sx={{
-//                             "&:nth-of-type(odd)": {
-//                               backgroundColor: "#f9f9f9",
-//                             },
-//                             "&:hover": { backgroundColor: "#f1f1f1" },
-//                           }}
-//                         >
-//                           <Box
-//                             component="td"
-//                             sx={{
-//                               padding: "12px 15px",
-//                               borderBottom: "1px solid #ddd",
-//                               fontWeight: "500",
-//                             }}
-//                           >
-//                             O3
-//                           </Box>
-//                           <Box
-//                             component="td"
-//                             sx={{
-//                               padding: "12px 15px",
-//                               borderBottom: "1px solid #ddd",
-//                               color:
-//                                 airData.o3 <= 70
-//                                   ? "green"
-//                                   : airData.o3 <= 120
-//                                   ? "orange"
-//                                   : "red",
-//                               fontWeight: "bold",
-//                             }}
-//                           >
-//                             {airData.o3 ?? "--"}
-//                           </Box>
-//                         </Box>
-//                       </Box>
-//                     </>
-//                   )}
-//                 </Box>
-//               </Box>
-//             )}
-//       </Box>
-//     </>
-//   );
-// };
-
-// export default Search;
-
 import {
   MapContainer,
   TileLayer,
@@ -403,13 +7,18 @@ import {
 } from "react-leaflet";
 import { useState, useEffect, useRef } from "react";
 import "leaflet/dist/leaflet.css";
-import { Box, Typography, CircularProgress, Button } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Button,
+  CircularProgress,
+} from "@mui/material";
+import ParameterChart from "../../Components/ParameterChart";
 
 const ClickHandler = ({ onClick }) => {
   useMapEvents({
     click: (e) => {
-      const { lat, lng } = e.latlng;
-      onClick({ lat, lon: lng });
+      onClick({ lat: e.latlng.lat, lon: e.latlng.lng });
     },
   });
   return null;
@@ -419,29 +28,32 @@ const Search = () => {
   const [position, setPosition] = useState(null);
   const [airData, setAirData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [selectedParameter, setSelectedParameter] = useState(null);
+  const [mapKey, setMapKey] = useState(Date.now()); 
   const intervalRef = useRef(null);
+  const mapRef = useRef();
+  const mapContainerRef = useRef();
 
   const fetchWeather = async (coords) => {
     if (!coords) return;
     setLoading(true);
     try {
-      const airRes = await fetch(
+      const res = await fetch(
         `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${coords.lat}&longitude=${coords.lon}&hourly=pm10,pm2_5,carbon_monoxide,nitrogen_dioxide,sulphur_dioxide,ozone,us_aqi`
       );
-      const airJson = await airRes.json();
-      const index = 0;
-
+      const json = await res.json();
+      const idx = 0;
       setAirData({
-        aqi: airJson.hourly.us_aqi?.[index],
-        pm25: airJson.hourly.pm2_5?.[index],
-        pm10: airJson.hourly.pm10?.[index],
-        co: airJson.hourly.carbon_monoxide?.[index],
-        no2: airJson.hourly.nitrogen_dioxide?.[index],
-        so2: airJson.hourly.sulphur_dioxide?.[index],
-        o3: airJson.hourly.ozone?.[index],
+        aqi: json.hourly.us_aqi?.[idx],
+        pm25: json.hourly.pm2_5?.[idx],
+        pm10: json.hourly.pm10?.[idx],
+        co: json.hourly.carbon_monoxide?.[idx],
+        no2: json.hourly.nitrogen_dioxide?.[idx],
+        so2: json.hourly.sulphur_dioxide?.[idx],
+        o3: json.hourly.ozone?.[idx],
       });
-    } catch (error) {
-      console.error("خطا در دریافت اطلاعات:", error);
+    } catch (err) {
+      console.error(err);
       setAirData(null);
     } finally {
       setLoading(false);
@@ -453,351 +65,191 @@ const Search = () => {
     fetchWeather(coords);
   };
 
-  const handleUpdateClick = () => {
-    if (position) fetchWeather(position);
-  };
-
   useEffect(() => {
     if (position) {
-      intervalRef.current = setInterval(() => {
-        fetchWeather(position);
-      }, 60000); // 60 seconds
-
+      intervalRef.current = setInterval(() => fetchWeather(position), 60000);
       return () => clearInterval(intervalRef.current);
     }
   }, [position]);
 
+  useEffect(() => {
+    const handleResize = () => {
+      if (mapRef.current) {
+        setTimeout(() => {
+          mapRef.current.invalidateSize();
+        }, 200);
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const onMapReady = (mapInstance) => {
+    mapRef.current = mapInstance.target;
+    setTimeout(() => {
+      if (mapRef.current) {
+        mapRef.current.invalidateSize();
+      }
+    }, 0);
+  };
+
   return (
-    <>
-      <Box
-        sx={{
-          mt: 4,
-          display: "flex",
-          flexDirection: { xs: "column", md: "row" },
-          minHeight: "200px",
-          borderRadius: 2,
-          boxShadow: "0 0 10px 2px #4381C4",
-          p: { xs: 2, md: 3 },
-          gap: { xs: 2, md: 3 },
-        }}
-      >
-        <Box
-          sx={{
-            width: { xs: "100%", md: "55%" },
-            height: { xs: "300px", md: "400px" },
-            pr: { xs: 0, md: 2 },
-          }}
+    <Box sx={{ mt: 4, p:{xs:'10px',md:3}, display: "flex", flexDirection: "column", gap: 3 }}>
+      
+      <Box  sx={{
+                  mt: 4,
+                  display: "flex",
+                  flexDirection: { xs: "column", md: "row" },
+                  borderRadius: 2,
+                  boxShadow: "0 0 10px 2px #4381C4",
+                  p: { xs: 2, md: 3 },
+                  gap: { xs: 2, md: 3 },
+                }}>
+        <Box 
+          sx={{ flex: 1, height: { xs: 300, md: 400 }, minWidth: 0 }}
+          ref={mapContainerRef}
         >
           <MapContainer
+            key={mapKey} 
+            whenReady={onMapReady}
             center={[35.6892, 51.389]}
             zoom={5}
-            scrollWheelZoom={true}
-            style={{ height: "100%", width: "100%" }}
+            scrollWheelZoom
+            style={{ width: "100%", height: "100%", minHeight: "300px" }}
           >
-            <TileLayer
-              attribution='&copy; <a href="https://openstreetmap.org">OpenStreetMap</a>'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
+            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
             <ClickHandler onClick={handleMapClick} />
             {position && (
               <Marker position={[position.lat, position.lon]}>
                 <Popup>
-                  مختصات: {position.lat.toFixed(4)}, {position.lon.toFixed(4)}
+                  Lat: {position.lat.toFixed(4)}, Lon: {position.lon.toFixed(4)}
                 </Popup>
               </Marker>
             )}
           </MapContainer>
         </Box>
 
-        <Box
-          sx={{
-            width: { xs: "95%", md: "40%" },
-            minHeight: { xs: "auto", md: "100%" },
-            py: "15px",
-            px: "10px",
-          }}
-        >
+      
+        <Box sx={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
           <Button
-            onClick={handleUpdateClick}
-            variant="contained"
-            sx={{ display: "block", mx: "auto", my: 2 }}
             disabled={!position || loading}
+            variant="contained"
+            onClick={() => fetchWeather(position)}
+            sx={{ mb: 2 }}
           >
             Update
           </Button>
+          {loading && <CircularProgress sx={{ my: 2 }} />}
+          {airData && (
+            <Box sx={{ width: "100%" }}>
+              {Object.entries(airData).map(([k, v]) => (
+                <Box
+                  key={k}
+                  onClick={() => setSelectedParameter(k)}
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    py: 1,
+                    px: 2,
+                    borderBottom: "1px solid #ccc",
+                    cursor: "pointer",
+                    "&:hover": { backgroundColor: "#f5f5f5" },
+                  }}
+                >
+                  <Typography sx={{ fontWeight: 600, color: "#4381C4" }}>{k.toUpperCase()}</Typography>
+<Typography
+  sx={{
+    fontWeight: "bold",
+    color: (() => {
+      if (v === null || v === undefined) return "black";
+      
+      switch(k) {
+        case 'aqi':
+          if (v <= 50) return '#4CAF50'; 
+          if (v <= 150) return '#FFC107'; 
+          return '#F44336'; 
 
-          {loading && (
-            <CircularProgress sx={{ display: "block", mx: "auto" }} />
+        case 'pm25':
+          if (v <= 12) return '#4CAF50'; 
+          if (v <= 35) return '#FFC107'; 
+          return '#F44336'; 
+
+        case 'pm10':
+          if (v <= 50) return '#4CAF50'; 
+          if (v <= 150) return '#FFC107'; 
+          return '#F44336'; 
+
+        case 'no2':
+          if (v <= 50) return '#4CAF50'; 
+          if (v <= 100) return '#FFC107'; 
+          return '#F44336'; 
+
+        case 'so2':
+          if (v <= 50) return '#4CAF50'; 
+          if (v <= 150) return '#FFC107'; 
+          return '#F44336'; 
+
+        case 'o3':
+          if (v <= 50) return '#4CAF50'; 
+          if (v <= 100) return '#FFC107'; 
+          return '#F44336'; 
+
+        case 'co':
+          if (v <= 1) return '#4CAF50'; 
+          if (v <= 2) return '#FFC107'; 
+          return '#F44336'; 
+
+        default:
+          return 'black';
+      }
+    })()
+  }}
+>
+                    {v ?? "--"}
+                  </Typography>
+                </Box>
+              ))}
+            </Box>
           )}
-
-          <Box
-            component="table"
-            sx={{
-              width: "100%",
-              borderCollapse: "collapse",
-              margin: "20px 0",
-              fontFamily: "Arial, sans-serif",
-            }}
-          >
-            {airData && (
-              <>
-                <Box component="thead">
-                  <Box component="tr" sx={{ backgroundColor: "#f5f5f5" }}>
-                    <Box
-                      component="th"
-                      sx={{
-                        padding: "12px 15px",
-                        textAlign: "left",
-                        borderBottom: "2px solid #ddd",
-                        fontWeight: "bold",
-                        color: "#4381C4",
-                      }}
-                    >
-                      Parameter
-                    </Box>
-                    <Box
-                      component="th"
-                      sx={{
-                        padding: "12px 15px",
-                        textAlign: "left",
-                        borderBottom: "2px solid #ddd",
-                        fontWeight: "bold",
-                        color: "#4381C4",
-                      }}
-                    >
-                      Value
-                    </Box>
-                  </Box>
-                </Box>
-                <Box component="tbody">
-                  <Box
-                    component="tr"
-                    sx={{
-                      "&:nth-of-type(odd)": {
-                        backgroundColor: "#f9f9f9",
-                      },
-                      "&:hover": { backgroundColor: "#f1f1f1" },
-                    }}
-                  >
-                    <Box
-                      component="td"
-                      sx={{
-                        padding: "12px 15px",
-                        borderBottom: "1px solid #ddd",
-                        fontWeight: "500",
-                      }}
-                    >
-                      AQI
-                    </Box>
-                    <Box
-                      component="td"
-                      sx={{
-                        padding: "12px 15px",
-                        borderBottom: "1px solid #ddd",
-                        color:
-                          airData.aqi <= 50
-                            ? "green"
-                            : airData.aqi <= 100
-                            ? "orange"
-                            : "red",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      {airData.aqi ?? "--"}
-                    </Box>
-                  </Box>
-
-                  <Box
-                    component="tr"
-                    sx={{
-                      "&:nth-of-type(odd)": {
-                        backgroundColor: "#f9f9f9",
-                      },
-                      "&:hover": { backgroundColor: "#f1f1f1" },
-                    }}
-                  >
-                    <Box
-                      component="td"
-                      sx={{
-                        padding: "12px 15px",
-                        borderBottom: "1px solid #ddd",
-                        fontWeight: "500",
-                      }}
-                    >
-                      PM2.5
-                    </Box>
-                    <Box
-                      component="td"
-                      sx={{
-                        padding: "12px 15px",
-                        borderBottom: "1px solid #ddd",
-                        color:
-                          airData.pm25 <= 12
-                            ? "green"
-                            : airData.pm25 <= 35.4
-                            ? "orange"
-                            : "red",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      {airData.pm25 ?? "--"}
-                    </Box>
-                  </Box>
-
-                  <Box
-                    component="tr"
-                    sx={{
-                      "&:nth-of-type(odd)": {
-                        backgroundColor: "#f9f9f9",
-                      },
-                      "&:hover": { backgroundColor: "#f1f1f1" },
-                    }}
-                  >
-                    <Box
-                      component="td"
-                      sx={{
-                        padding: "12px 15px",
-                        borderBottom: "1px solid #ddd",
-                        fontWeight: "500",
-                      }}
-                    >
-                      PM10
-                    </Box>
-                    <Box
-                      component="td"
-                      sx={{
-                        padding: "12px 15px",
-                        borderBottom: "1px solid #ddd",
-                        color:
-                          airData.pm10 <= 54
-                            ? "green"
-                            : airData.pm10 <= 154
-                            ? "orange"
-                            : "red",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      {airData.pm10 ?? "--"}
-                    </Box>
-                  </Box>
-
-                  <Box
-                    component="tr"
-                    sx={{
-                      "&:nth-of-type(odd)": {
-                        backgroundColor: "#f9f9f9",
-                      },
-                      "&:hover": { backgroundColor: "#f1f1f1" },
-                    }}
-                  >
-                    <Box
-                      component="td"
-                      sx={{
-                        padding: "12px 15px",
-                        borderBottom: "1px solid #ddd",
-                        fontWeight: "500",
-                      }}
-                    >
-                      NO2
-                    </Box>
-                    <Box
-                      component="td"
-                      sx={{
-                        padding: "12px 15px",
-                        borderBottom: "1px solid #ddd",
-                        color:
-                          airData.no2 <= 53
-                            ? "green"
-                            : airData.no2 <= 100
-                            ? "orange"
-                            : "red",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      {airData.no2 ?? "--"}
-                    </Box>
-                  </Box>
-
-                  <Box
-                    component="tr"
-                    sx={{
-                      "&:nth-of-type(odd)": {
-                        backgroundColor: "#f9f9f9",
-                      },
-                      "&:hover": { backgroundColor: "#f1f1f1" },
-                    }}
-                  >
-                    <Box
-                      component="td"
-                      sx={{
-                        padding: "12px 15px",
-                        borderBottom: "1px solid #ddd",
-                        fontWeight: "500",
-                      }}
-                    >
-                      SO2
-                    </Box>
-                    <Box
-                      component="td"
-                      sx={{
-                        padding: "12px 15px",
-                        borderBottom: "1px solid #ddd",
-                        color:
-                          airData.so2 <= 35
-                            ? "green"
-                            : airData.so2 <= 75
-                            ? "orange"
-                            : "red",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      {airData.so2 ?? "--"}
-                    </Box>
-                  </Box>
-
-                  <Box
-                    component="tr"
-                    sx={{
-                      "&:nth-of-type(odd)": {
-                        backgroundColor: "#f9f9f9",
-                      },
-                      "&:hover": { backgroundColor: "#f1f1f1" },
-                    }}
-                  >
-                    <Box
-                      component="td"
-                      sx={{
-                        padding: "12px 15px",
-                        borderBottom: "1px solid #ddd",
-                        fontWeight: "500",
-                      }}
-                    >
-                      O3
-                    </Box>
-                    <Box
-                      component="td"
-                      sx={{
-                        padding: "12px 15px",
-                        borderBottom: "1px solid #ddd",
-                        color:
-                          airData.o3 <= 70
-                            ? "green"
-                            : airData.o3 <= 120
-                            ? "orange"
-                            : "red",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      {airData.o3 ?? "--"}
-                    </Box>
-                  </Box>
-                </Box>
-              </>
-            )}
-          </Box>
         </Box>
       </Box>
-    </>
+
+{selectedParameter && (
+  <Box
+    sx={{
+      p: { xs: 2, md: 3 },
+      mx: 'auto',
+      width: { xs: '100%', md: '90%' }, 
+      maxWidth: '1200px', 
+      backgroundColor: "#f5faff",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      mt: 4,
+      borderRadius: "10px",
+      boxShadow: "0 0 10px 0 rgba(0,0,0,0.2)",
+      boxSizing: 'border-box', 
+    }}
+  >
+    <Typography variant="h6" gutterBottom sx={{ width: '100%', textAlign: 'center' }}>
+      {selectedParameter.toUpperCase()} - Chart (Last 24h)
+    </Typography>
+    <Box sx={{ width: '100%', p: { xs: 0, md: 1 } }}>
+      <ParameterChart city={position} parameter={selectedParameter} />
+    </Box>
+    <Button 
+      onClick={() => setSelectedParameter(null)} 
+      variant="outlined" 
+      color="error" 
+      sx={{ mt: 2, mb: 2 }}
+    >
+      Close
+    </Button>
+  </Box>
+)}
+
+    </Box>
   );
 };
 

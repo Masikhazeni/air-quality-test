@@ -17,10 +17,11 @@ export default function Loading() {
         right:'0',
         bottom:'0',
         background:'blur',
-        backgroundColor:'white'
+        backgroundColor:'white',
+        zIndex:'2000'
       }}
     >
-      <FadeLoader size={80} color="green" />
+      <FadeLoader size={80} color="blue" />
     </Box>
   );
 }
