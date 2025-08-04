@@ -660,7 +660,7 @@ function ApiQualityApp() {
                 label="City"
                 onChange={handleCityChange}
                 value={selectedCity?.name || ""}
-                sx={{ width: "150px" }}
+                sx={{ width: "150px",mb: { xs: "20px", md: "0" } }}
               >
                 {selectedCountry.cities.map((city) => (
                   <MenuItem key={city.name} value={city.name}>
@@ -678,7 +678,7 @@ function ApiQualityApp() {
               onClick={fetchData}
               disabled={loading}
             >
-              {loading ? "در حال بروزرسانی..." : "بروزرسانی دستی"}
+              {loading ? "Updating ..." : "Update"}
             </Button>
           )}
         </Box>
@@ -709,145 +709,277 @@ function ApiQualityApp() {
             {!loading && (weather || airData) && (
               <Box
                 sx={{
-                  width: { xs: "100%", md: "40%" },
+                  width: { xs: "95%", md: "40%" },
                   minHeight: { xs: "auto", md: "100%" },
                   py: "15px",
                   px: "10px",
                 }}
               >
-                <Typography variant="h6" sx={{ textAlign: "center" }}>
-                  Weather and Air Quality Information
+                <Typography variant="h6" sx={{ textAlign: "center" ,color:'#4381C4'}}>
+                 Air Quality Information
                 </Typography>
+              
+                 <Box
+  component="table"
+  sx={{
+    width: '100%',
+    borderCollapse: 'collapse',
+    margin: '20px 0',
+    fontFamily: 'Arial, sans-serif',
+  }}
+>
+  {airData && (
+    <>
+      <Box component="thead" >
+        <Box component="tr" sx={{ backgroundColor: '#f5f5f5' }}>
+          <Box
+            component="th"
+            sx={{
+              padding: '12px 15px',
+              textAlign: 'left',
+              borderBottom: '2px solid #ddd',
+              fontWeight: 'bold',
+              color: '#4381C4',
+            }}
+          >
+            Parameter
+          </Box>
+          <Box
+            component="th"
+            sx={{
+              padding: '12px 15px',
+              textAlign: 'left',
+              borderBottom: '2px solid #ddd',
+              fontWeight: 'bold',
+              color: '#4381C4',
+            }}
+          >
+            Value
+          </Box>
+        </Box>
+      </Box>
+      <Box component="tbody">
+        {/* AQI Row */}
+        <Box
+          component="tr"
+          sx={{
+            '&:nth-of-type(odd)': { backgroundColor: '#f9f9f9' },
+            '&:hover': { backgroundColor: '#f1f1f1' },
+          }}
+        >
+          <Box
+            component="td"
+            sx={{
+              padding: '12px 15px',
+              borderBottom: '1px solid #ddd',
+              fontWeight: '500',
+            }}
+          >
+            AQI
+          </Box>
+          <Box
+            component="td"
+            sx={{
+              padding: '12px 15px',
+              borderBottom: '1px solid #ddd',
+              color:
+                airData.aqi <= 50
+                  ? 'green'
+                  : airData.aqi <= 100
+                  ? 'orange'
+                  : 'red',
+              fontWeight: 'bold',
+            }}
+          >
+            {airData.aqi ?? "--"}
+          </Box>
+        </Box>
 
-                <Box
-                  component="ul"
-                  sx={{
-                    listStyle: "none",
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    gap: "10px",
-                  }}
-                >
-                  {weather && (
-                    <>
-                      <Box component="li" sx={{ mb: 1, display: "flex" }}>
-                        <Typography sx={{ color: "#4381C4" }}>
-                          temperature :
-                        </Typography>
-                        &nbsp;{weather.temperature_2m} °C
-                      </Box>
-                      <Box component="li" sx={{ mb: 1 }}>
-                        <Typography>wind_speed</Typography>{" "}
-                        {weather.wind_speed_10m} km/h
-                      </Box>
-                    </>
-                  )}
+        {/* PM2.5 Row */}
+        <Box
+          component="tr"
+          sx={{
+            '&:nth-of-type(odd)': { backgroundColor: '#f9f9f9' },
+            '&:hover': { backgroundColor: '#f1f1f1' },
+          }}
+        >
+          <Box
+            component="td"
+            sx={{
+              padding: '12px 15px',
+              borderBottom: '1px solid #ddd',
+              fontWeight: '500',
+            }}
+          >
+            PM2.5
+          </Box>
+          <Box
+            component="td"
+            sx={{
+              padding: '12px 15px',
+              borderBottom: '1px solid #ddd',
+              color:
+                airData.pm25 <= 12
+                  ? 'green'
+                  : airData.pm25 <= 35.4
+                  ? 'orange'
+                  : 'red',
+              fontWeight: 'bold',
+            }}
+          >
+            {airData.pm25 ?? "--"}
+          </Box>
+        </Box>
 
-                  {airData && (
-                    <>
-                      <Box
-                        component="li"
-                        sx={{
-                          mb: 1,
-                          color:
-                            airData.aqi <= 50
-                              ? "green"
-                              : airData.aqi <= 100
-                              ? "orange"
-                              : "red",
-                        }}
-                      >
-                        AQI: {airData.aqi ?? "--"}
-                      </Box>
-                      <Box
-                        component="li"
-                        sx={{
-                          mb: 1,
-                          color:
-                            airData.pm25 <= 12
-                              ? "green"
-                              : airData.pm25 <= 35.4
-                              ? "orange"
-                              : "red",
-                        }}
-                      >
-                        PM2.5: {airData.pm25 ?? "--"}
-                      </Box>
-                      <Box
-                        component="li"
-                        sx={{
-                          mb: 1,
-                          color:
-                            airData.pm10 <= 54
-                              ? "green"
-                              : airData.pm10 <= 154
-                              ? "orange"
-                              : "red",
-                        }}
-                      >
-                        PM10: {airData.pm10 ?? "--"}
-                      </Box>
-                      <Box
-                        component="li"
-                        sx={{
-                          mb: 1,
-                          color:
-                            airData.co <= 4.4
-                              ? "green"
-                              : airData.co <= 9.4
-                              ? "orange"
-                              : "red",
-                        }}
-                      >
-                        CO: {airData.co ?? "--"}
-                      </Box>
-                      <Box
-                        component="li"
-                        sx={{
-                          mb: 1,
-                          color:
-                            airData.no2 <= 53
-                              ? "green"
-                              : airData.no2 <= 100
-                              ? "orange"
-                              : "red",
-                        }}
-                      >
-                        NO2: {airData.no2 ?? "--"}
-                      </Box>
-                      <Box
-                        component="li"
-                        sx={{
-                          mb: 1,
-                          color:
-                            airData.so2 <= 35
-                              ? "green"
-                              : airData.so2 <= 75
-                              ? "orange"
-                              : "red",
-                        }}
-                      >
-                        SO2: {airData.so2 ?? "--"}
-                      </Box>
-                      <Box
-                        component="li"
-                        sx={{
-                          mb: 1,
-                          color:
-                            airData.o3 <= 70
-                              ? "green"
-                              : airData.o3 <= 120
-                              ? "orange"
-                              : "red",
-                        }}
-                      >
-                        O3: {airData.o3 ?? "--"}
-                      </Box>
-                    </>
-                  )}
-                </Box>
+        {/* PM10 Row */}
+        <Box
+          component="tr"
+          sx={{
+            '&:nth-of-type(odd)': { backgroundColor: '#f9f9f9' },
+            '&:hover': { backgroundColor: '#f1f1f1' },
+          }}
+        >
+          <Box
+            component="td"
+            sx={{
+              padding: '12px 15px',
+              borderBottom: '1px solid #ddd',
+              fontWeight: '500',
+            }}
+          >
+            PM10
+          </Box>
+          <Box
+            component="td"
+            sx={{
+              padding: '12px 15px',
+              borderBottom: '1px solid #ddd',
+              color:
+                airData.pm10 <= 54
+                  ? 'green'
+                  : airData.pm10 <= 154
+                  ? 'orange'
+                  : 'red',
+              fontWeight: 'bold',
+            }}
+          >
+            {airData.pm10 ?? "--"}
+          </Box>
+        </Box>
+
+        {/* NO2 Row */}
+        <Box
+          component="tr"
+          sx={{
+            '&:nth-of-type(odd)': { backgroundColor: '#f9f9f9' },
+            '&:hover': { backgroundColor: '#f1f1f1' },
+          }}
+        >
+          <Box
+            component="td"
+            sx={{
+              padding: '12px 15px',
+              borderBottom: '1px solid #ddd',
+              fontWeight: '500',
+            }}
+          >
+            NO2
+          </Box>
+          <Box
+            component="td"
+            sx={{
+              padding: '12px 15px',
+              borderBottom: '1px solid #ddd',
+              color:
+                airData.no2 <= 53
+                  ? 'green'
+                  : airData.no2 <= 100
+                  ? 'orange'
+                  : 'red',
+              fontWeight: 'bold',
+            }}
+          >
+            {airData.no2 ?? "--"}
+          </Box>
+        </Box>
+
+        {/* SO2 Row */}
+        <Box
+          component="tr"
+          sx={{
+            '&:nth-of-type(odd)': { backgroundColor: '#f9f9f9' },
+            '&:hover': { backgroundColor: '#f1f1f1' },
+          }}
+        >
+          <Box
+            component="td"
+            sx={{
+              padding: '12px 15px',
+              borderBottom: '1px solid #ddd',
+              fontWeight: '500',
+            }}
+          >
+            SO2
+          </Box>
+          <Box
+            component="td"
+            sx={{
+              padding: '12px 15px',
+              borderBottom: '1px solid #ddd',
+              color:
+                airData.so2 <= 35
+                  ? 'green'
+                  : airData.so2 <= 75
+                  ? 'orange'
+                  : 'red',
+              fontWeight: 'bold',
+            }}
+          >
+            {airData.so2 ?? "--"}
+          </Box>
+        </Box>
+
+        {/* O3 Row */}
+        <Box
+          component="tr"
+          sx={{
+            '&:nth-of-type(odd)': { backgroundColor: '#f9f9f9' },
+            '&:hover': { backgroundColor: '#f1f1f1' },
+          }}
+        >
+          <Box
+            component="td"
+            sx={{
+              padding: '12px 15px',
+              borderBottom: '1px solid #ddd',
+              fontWeight: '500',
+            }}
+          >
+            O3
+          </Box>
+          <Box
+            component="td"
+            sx={{
+              padding: '12px 15px',
+              borderBottom: '1px solid #ddd',
+              color:
+                airData.o3 <= 70
+                  ? 'green'
+                  : airData.o3 <= 120
+                  ? 'orange'
+                  : 'red',
+              fontWeight: 'bold',
+            }}
+          >
+            {airData.o3 ?? "--"}
+          </Box>
+        </Box>
+      </Box>
+    </>
+  )}
+</Box>
+                 
+               
               </Box>
             )}
           </Box>
@@ -858,3 +990,137 @@ function ApiQualityApp() {
 }
 
 export default ApiQualityApp;
+
+
+
+
+
+//  <Box
+//                   component="ul"
+//                   sx={{
+//                     listStyle: "none",
+//                     display: "flex",
+//                     flexDirection: "column",
+//                     justifyContent: "center",
+//                     alignItems: "center",
+//                     gap: "10px",
+//                   }}
+//                 >
+//                   {weather && (
+//                     <>
+//                       <Box component="li" sx={{ mb: 1, display: "flex" }}>
+//                         <Typography sx={{ color: "#4381C4" }}>
+//                           temperature :
+//                         </Typography>
+//                         &nbsp;{weather.temperature_2m} °C
+//                       </Box>
+//                       <Box component="li" sx={{ mb: 1 }}>
+//                         <Typography>wind_speed</Typography>{" "}
+//                         {weather.wind_speed_10m} km/h
+//                       </Box>
+//                     </>
+//                   )}
+
+//                   {airData && (
+//                     <>
+//                       <Box
+//                         component="li"
+//                         sx={{
+//                           mb: 1,
+//                           color:
+//                             airData.aqi <= 50
+//                               ? "green"
+//                               : airData.aqi <= 100
+//                               ? "orange"
+//                               : "red",
+//                         }}
+//                       >
+//                         AQI: {airData.aqi ?? "--"}
+//                       </Box>
+//                       <Box
+//                         component="li"
+//                         sx={{
+//                           mb: 1,
+//                           color:
+//                             airData.pm25 <= 12
+//                               ? "green"
+//                               : airData.pm25 <= 35.4
+//                               ? "orange"
+//                               : "red",
+//                         }}
+//                       >
+//                         PM2.5: {airData.pm25 ?? "--"}
+//                       </Box>
+//                       <Box
+//                         component="li"
+//                         sx={{
+//                           mb: 1,
+//                           color:
+//                             airData.pm10 <= 54
+//                               ? "green"
+//                               : airData.pm10 <= 154
+//                               ? "orange"
+//                               : "red",
+//                         }}
+//                       >
+//                         PM10: {airData.pm10 ?? "--"}
+//                       </Box>
+//                       <Box
+//                         component="li"
+//                         sx={{
+//                           mb: 1,
+//                           color:
+//                             airData.co <= 4.4
+//                               ? "green"
+//                               : airData.co <= 9.4
+//                               ? "orange"
+//                               : "red",
+//                         }}
+//                       >
+                        
+//                       </Box>
+//                       <Box
+//                         component="li"
+//                         sx={{
+//                           mb: 1,
+//                           color:
+//                             airData.no2 <= 53
+//                               ? "green"
+//                               : airData.no2 <= 100
+//                               ? "orange"
+//                               : "red",
+//                         }}
+//                       >
+//                         NO2: {airData.no2 ?? "--"}
+//                       </Box>
+//                       <Box
+//                         component="li"
+//                         sx={{
+//                           mb: 1,
+//                           color:
+//                             airData.so2 <= 35
+//                               ? "green"
+//                               : airData.so2 <= 75
+//                               ? "orange"
+//                               : "red",
+//                         }}
+//                       >
+//                         SO2: {airData.so2 ?? "--"}
+//                       </Box>
+//                       <Box
+//                         component="li"
+//                         sx={{
+//                           mb: 1,
+//                           color:
+//                             airData.o3 <= 70
+//                               ? "green"
+//                               : airData.o3 <= 120
+//                               ? "orange"
+//                               : "red",
+//                         }}
+//                       >
+                        
+//                       </Box>
+//                     </>
+//                   )}
+//                 </Box>
