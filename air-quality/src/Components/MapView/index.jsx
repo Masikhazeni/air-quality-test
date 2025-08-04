@@ -5,6 +5,7 @@ import L from "leaflet";
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
+import { Box } from "@mui/material";
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -17,7 +18,7 @@ const MapView = ({ city }) => {
   if (!city) return null;
 
   return (
-    <div style={{ height: "400px", marginTop: 20 }}>
+    <Box sx={{height:'100%'}}>
       <MapContainer
         center={[city.lat, city.lon]}
         zoom={10}
@@ -34,7 +35,7 @@ const MapView = ({ city }) => {
           </Popup>
         </Marker>
       </MapContainer>
-    </div>
+    </Box>
   );
 };
 
