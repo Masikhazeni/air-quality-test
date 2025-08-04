@@ -21,6 +21,7 @@
     "react-hot-toast": "^2.5.2",
     "react-leaflet": "^5.0.0",
     "react-redux": "^9.2.0",
+    "react-spinners": "^0.17.0",
     "redux": "^5.0.1",
     "spinner": "^0.3.4"
   },
