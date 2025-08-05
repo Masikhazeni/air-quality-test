@@ -1,6 +1,9 @@
 # air-quality-test
  این یک پروژه  React برای برررسی داده های کیفیت هوا مربوط به نقاط مختلف در جهان است ک با استفاده از https://air-quality-api.open-meteo.com  داده ها در یافت و مورد استفاده قرار گرفت.
 
+ لینک دموی پروژه :
+ https://masikhazeni.github.io/air-quality-test/
+
  کتابخانه های مورد استفاده :
  
  1.mui
