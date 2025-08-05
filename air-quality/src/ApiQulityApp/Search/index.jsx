@@ -18,6 +18,7 @@ import L from 'leaflet';
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
 import Loading from "../../Components/Loading";
+import notify from "../../Utils/notify";
 
 let DefaultIcon = L.icon({
     iconUrl: icon,
@@ -63,8 +64,10 @@ const Search = () => {
         so2: json.hourly.sulphur_dioxide?.[idx],
         o3: json.hourly.ozone?.[idx],
       });
+      notify('success','Data received successfully')
     } catch (err) {
       console.error(err);
+      notify('error','Data reception failed')
       setAirData(null);
     } finally {
       setLoading(false);

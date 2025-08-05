@@ -58,10 +58,10 @@ function ApiQualityApp() {
         so2: airJson.hourly.sulphur_dioxide?.[index],
         o3: airJson.hourly.ozone?.[index],
       });
-      notify("success", "داده‌ها با موفقیت دریافت شد");
+      notify("success", 'Data received successfully');
     } catch (err) {
-      console.error("خطا در دریافت اطلاعات:", err);
-      notify("error", "دریافت داده‌ها ناموفق بود");
+      console.error("Data reception failed :", err);
+      notify("error", "Data reception failed");
     } finally {
       setLoading(false);
     }
