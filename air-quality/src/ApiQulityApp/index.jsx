@@ -189,7 +189,7 @@ function ApiQualityApp() {
                       disabled={loading}
                       sx={{ mb: 2 }}
                     >
-                      {loading ? "Updating ..." : "Update"}
+                      {loading ? "Updating ..." : `Update data of ${selectedCity.name}`}
                     </Button>
 
                     <Box sx={{ width: "100%" }}>
