@@ -10,8 +10,6 @@ import {
   MenuItem,
   Paper,
   Button,
-  Card,
-  CardContent,
 } from "@mui/material";
 import notify from "../Utils/notify";
 import Search from "./Search";
@@ -91,7 +89,7 @@ function ApiQualityApp() {
 
         <Box
           sx={{
-            width: "80%",
+            maxWidth: "1200px",
             margin: "0 auto",
             display: "flex",
             justifyContent: "center",

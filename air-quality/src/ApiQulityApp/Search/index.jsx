@@ -14,6 +14,17 @@ import {
   CircularProgress,
 } from "@mui/material";
 import ParameterChart from "../../Components/ParameterChart";
+import L from 'leaflet';
+import icon from 'leaflet/dist/images/marker-icon.png';
+import iconShadow from 'leaflet/dist/images/marker-shadow.png';
+import Loading from "../../Components/Loading";
+
+let DefaultIcon = L.icon({
+    iconUrl: icon,
+    shadowUrl: iconShadow
+});
+
+L.Marker.prototype.options.icon = DefaultIcon;
 
 const ClickHandler = ({ onClick }) => {
   useMapEvents({
@@ -95,6 +106,8 @@ const Search = () => {
   };
 
   return (
+    <>
+    {loading&&<Loading/>}
     <Box sx={{ mt: 4, p:{xs:'10px',md:3}, display: "flex", flexDirection: "column", gap: 3 }}>
       
       <Box  sx={{
@@ -250,6 +263,7 @@ const Search = () => {
 )}
 
     </Box>
+    </>
   );
 };
 
