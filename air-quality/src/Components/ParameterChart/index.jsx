@@ -34,31 +34,29 @@ function ParameterChart({ city, parameter }) {
     const pr = finalParameter(parameter);
 
     const fetchChartData = async () => {
-      setLoading(true);
-      try {
-        const url = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${city.lat}&longitude=${city.lon}&hourly=${pr}`;
+  setLoading(true);
+  try {
+    const url = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${city.lat}&longitude=${city.lon}&hourly=${pr}`;
+    const res = await fetch(url);
+    const json = await res.json();
 
-        const res = await fetch(url);
-        const json = await res.json();
-        console.log(json);
+    const times = json.hourly.time || [];
+    const values = json.hourly[pr] || [];
 
-        const times = json.hourly.time || [];
-        const values = json.hourly[pr] || [];
+    const chartData = times.map((time, i) => ({
+      time: time.split("T")[1], 
+      value: values[i],
+    }));
 
-        const chartData = times.map((time, i) => (
-          {
-          time: time.split("T")[1],
-          value: values[i],
-          }
-         ));
+    const last24Hours = chartData.slice(-24).filter((item) => item.value !== null);
 
-        setData(chartData.slice(-24));
-      } catch (err) {
-        console.error("Error fetching chart data:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
+    setData(last24Hours);
+  } catch (err) {
+    console.error("Error fetching chart data:", err);
+  } finally {
+    setLoading(false);
+  }
+};
 
     fetchChartData();
   }, [city, parameter]);
@@ -85,3 +83,9 @@ function ParameterChart({ city, parameter }) {
 }
 
 export default ParameterChart;
+
+
+
+
+
+

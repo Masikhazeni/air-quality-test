@@ -59,51 +59,54 @@ const Search = () => {
       return "Unknown";
     }
   };
-
   const fetchWeather = async (coords) => {
-    if (!coords) return;
-    setLoading(true);
-    try {
-      const res = await fetch(
-        `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${coords.lat}&longitude=${coords.lon}&hourly=pm10,pm2_5,carbon_monoxide,nitrogen_dioxide,sulphur_dioxide,ozone,us_aqi`
-      );
-      const json = await res.json();
-      console.log(json);
-      const idx = 0;
-      findCity(coords)
-      console.log(city)
-      setAirData({
-        aqi: json.hourly.us_aqi?.[idx],
-        pm25: json.hourly.pm2_5?.[idx],
-        pm10: json.hourly.pm10?.[idx],
-        co: json.hourly.carbon_monoxide?.[idx],
-        no2: json.hourly.nitrogen_dioxide?.[idx],
-        so2: json.hourly.sulphur_dioxide?.[idx],
-        o3: json.hourly.ozone?.[idx],
-      });
-      notify("success", "Data received successfully");
-    } catch (err) {
-      console.error(err);
-      notify("error", "Data reception failed");
-      setAirData(null);
-    } finally {
-      setLoading(false);
+  if (!coords) return;
+  setLoading(true);
+  try {
+    const res = await fetch(
+      `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${coords.lat}&longitude=${coords.lon}&hourly=pm10,pm2_5,carbon_monoxide,nitrogen_dioxide,sulphur_dioxide,ozone,us_aqi`
+    );
+
+    const resData = await res.json();
+
+    const now = new Date();
+    const currentUTC = now.toISOString().slice(0, 13); 
+    const timeIndex = resData.hourly.time.findIndex((time) =>
+      time.startsWith(currentUTC)
+    );
+
+    if (timeIndex === -1) {
+      throw new Error("Current hour data not available.");
     }
-  };
+
+    await findCity(coords);
+
+    setAirData({
+      aqi: resData.hourly.us_aqi?.[timeIndex],
+      pm25: resData.hourly.pm2_5?.[timeIndex],
+      pm10: resData.hourly.pm10?.[timeIndex],
+      co: resData.hourly.carbon_monoxide?.[timeIndex],
+      no2: resData.hourly.nitrogen_dioxide?.[timeIndex],
+      so2: resData.hourly.sulphur_dioxide?.[timeIndex],
+      o3: resData.hourly.ozone?.[timeIndex],
+    });
+
+    notify("success", "Data received successfully");
+  } catch (err) {
+    console.error("Data reception failed:", err);
+    notify("error", "Data reception failed");
+    setAirData(null);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const handleMapClick = (coords) => {
     setPosition(coords);
     fetchWeather(coords);
   };
-
-  useEffect(() => {
-    if (position) {
-      intervalRef.current = setInterval(() => fetchWeather(position), 60000);
-      return () => clearInterval(intervalRef.current);
-    }
-  }, [position]);
-
-  useEffect(() => {
+useEffect(() => {
     const handleResize = () => {
       if (mapRef.current) {
         setTimeout(() => {

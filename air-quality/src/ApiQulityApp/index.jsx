@@ -38,39 +38,54 @@ function ApiQualityApp() {
     setSelectedCity(city);
   };
 
-  const fetchData = useCallback(async () => {
-    if (!selectedCity) return;
-    setLoading(true);
-    try {
-      const { lat, lon } = selectedCity;
-      const airRes = await fetch(
-        `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&hourly=pm10,pm2_5,carbon_monoxide,nitrogen_dioxide,sulphur_dioxide,ozone,us_aqi`
-      );
-      const airJson = await airRes.json();
-      const index = 0;
+const fetchData = useCallback(async () => {
+  if (!selectedCity) return;
+  setLoading(true);
+  try {
+    const { lat, lon } = selectedCity;
 
-      setAirData({
-        aqi: airJson.hourly.us_aqi?.[index],
-        pm25: airJson.hourly.pm2_5?.[index],
-        pm10: airJson.hourly.pm10?.[index],
-        co: airJson.hourly.carbon_monoxide?.[index],
-        no2: airJson.hourly.nitrogen_dioxide?.[index],
-        so2: airJson.hourly.sulphur_dioxide?.[index],
-        o3: airJson.hourly.ozone?.[index],
-      });
-      notify("success", 'Data received successfully');
-    } catch (err) {
-      console.error("Data reception failed :", err);
-      notify("error", "Data reception failed");
-    } finally {
-      setLoading(false);
+    const airRes = await fetch(
+      `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&hourly=pm10,pm2_5,carbon_monoxide,nitrogen_dioxide,sulphur_dioxide,ozone,us_aqi`
+    );
+    const airJson = await airRes.json();
+
+    const now = new Date();
+    const currentUTC = now.toISOString().slice(0, 13); // مثلا "2025-08-05T14"
+    console.log("time samples:", airJson.hourly.time.slice(-3));
+    console.log("currentUTC:", currentUTC);
+    const timeIndex = airJson.hourly.time.findIndex((time) =>
+      time.startsWith(currentUTC)
+    );
+
+    if (timeIndex === -1) {
+      throw new Error("Current hour data not available.");
     }
-  }, [selectedCity]);
+
+    setAirData({
+      aqi: airJson.hourly.us_aqi?.[timeIndex],
+      pm25: airJson.hourly.pm2_5?.[timeIndex],
+      pm10: airJson.hourly.pm10?.[timeIndex],
+      co: airJson.hourly.carbon_monoxide?.[timeIndex],
+      no2: airJson.hourly.nitrogen_dioxide?.[timeIndex],
+      so2: airJson.hourly.sulphur_dioxide?.[timeIndex],
+      o3: airJson.hourly.ozone?.[timeIndex],
+    });
+
+    notify("success", "Data received successfully");
+  } catch (err) {
+    console.error("Data reception failed:", err);
+    notify("error", "Data reception failed");
+    setAirData(null);
+  } finally {
+    setLoading(false);
+  }
+}, [selectedCity]);
+
+
 
   useEffect(() => {
     fetchData();
-    const interval = setInterval(fetchData, 60000);
-    return () => clearInterval(interval);
+   
   }, [fetchData]);
   console.log(airData);
   return (
