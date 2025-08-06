@@ -48,11 +48,11 @@ const Search = () => {
         `https://nominatim.openstreetmap.org/reverse?lat=${locations.lat}&lon=${locations.lon}&format=json`
       );
       const data = await res.json();
-      return (
-        setCity(data.address.city ||
-        data.address.town ||
-        data.address.village ||
-        "Unknown")
+      return setCity(
+        data.address.city ||
+          data.address.town ||
+          data.address.village ||
+          "Unknown"
       );
     } catch (error) {
       console.error("Failed to fetch city name:", error);
@@ -60,44 +60,62 @@ const Search = () => {
     }
   };
   const fetchWeather = async (coords) => {
-  if (!coords) return;
-  setLoading(true);
-  try {
-    const res = await fetch(
-      `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${coords.lat}&longitude=${coords.lon}&current=pm10,pm2_5,carbon_monoxide,nitrogen_dioxide,sulphur_dioxide,ozone,us_aqi&timezone=auto`
-    );
+    if (!coords) return;
+    setLoading(true);
+    try {
+      const { lat, lon } = coords;
+      const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const url = new URL(
+        "https://air-quality-api.open-meteo.com/v1/air-quality"
+      );
+      url.searchParams.append("latitude", lat);
+      url.searchParams.append("longitude", lon);
+      url.searchParams.append(
+        "current",
+        "pm10,pm2_5,carbon_monoxide,nitrogen_dioxide,sulphur_dioxide,ozone,us_aqi"
+      );
+      url.searchParams.append("timezone", userTimezone);
 
-    const airJson = await res.json();
+      const airRes = await fetch(url.toString());
 
+      if (!airRes.ok) {
+        throw new Error(` server errr: ${airRes.status}`);
+      }
 
-    await findCity(coords);
+      const text = await airRes.text();
+      if (!text) {
+        throw new Error("empty awnser");
+      }
 
-    setAirData({
-     aqi: airJson.current.us_aqi,
-      pm25: airJson.current.pm2_5,
-      pm10: airJson.current.pm10,
-      co: airJson.current.carbon_monoxide,
-      no2: airJson.current.nitrogen_dioxide,
-      so2: airJson.current.sulphur_dioxide,
-      o3: airJson.current.ozone,
-    });
+      const airJson = JSON.parse(text);
 
-    notify("success", "Data received successfully");
-  } catch (err) {
-    console.error("Data reception failed:", err);
-    notify("error", "Data reception failed");
-    setAirData(null);
-  } finally {
-    setLoading(false);
-  }
-};
+      await findCity(coords);
 
+      setAirData({
+        aqi: airJson.current.us_aqi,
+        pm25: airJson.current.pm2_5,
+        pm10: airJson.current.pm10,
+        co: airJson.current.carbon_monoxide,
+        no2: airJson.current.nitrogen_dioxide,
+        so2: airJson.current.sulphur_dioxide,
+        o3: airJson.current.ozone,
+      });
+
+      notify("success", "Data received successfully");
+    } catch (err) {
+      console.error("Data reception failed:", err);
+      notify("error", "Data reception failed");
+      setAirData(null);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleMapClick = (coords) => {
     setPosition(coords);
     fetchWeather(coords);
   };
-useEffect(() => {
+  useEffect(() => {
     const handleResize = () => {
       if (mapRef.current) {
         setTimeout(() => {
@@ -175,14 +193,13 @@ useEffect(() => {
               alignItems: "center",
             }}
           >
-            
             <Button
               disabled={!position || loading}
               variant="contained"
               onClick={() => fetchWeather(position)}
               sx={{ mb: 2 }}
             >
-           upadte data of : {city}
+              upadte data of : {city}
             </Button>
             {loading && <CircularProgress sx={{ my: 2 }} />}
             {airData && (
@@ -266,16 +283,19 @@ useEffect(() => {
             sx={{
               p: { xs: 2, md: 3 },
               mx: "auto",
-              width: { xs: "100%", md: "90%" },
-              maxWidth: "1200px",
+              
+              width: "100%",
               backgroundColor: "#f5faff",
+              minHeight:'500px',
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
+              justifyContent: "start",
               mt: 4,
               borderRadius: "10px",
               boxShadow: "0 0 10px 0 rgba(0,0,0,0.2)",
               boxSizing: "border-box",
+              position: "relative",
             }}
           >
             <Typography
@@ -285,7 +305,16 @@ useEffect(() => {
             >
               {selectedParameter.toUpperCase()} - Chart (Last 24h)
             </Typography>
-            <Box sx={{ width: "100%", p: { xs: 0, md: 1 } }}>
+            <Box
+             sx={{
+                width: "80%",
+                p:'5px 0 ',
+                position: "absolute",
+                top: {xs:'30%',md:'25%'},
+                left:{xs:'48%',md:'50%'},
+                transform: 'translateX(-52%)',
+              }}
+            >
               <ParameterChart city={position} parameter={selectedParameter} />
             </Box>
             <Button

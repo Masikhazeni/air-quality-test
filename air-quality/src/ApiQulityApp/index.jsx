@@ -38,18 +38,36 @@ function ApiQualityApp() {
     setSelectedCity(city);
   };
 
+
 const fetchData = useCallback(async () => {
   if (!selectedCity) return;
   setLoading(true);
   try {
     const { lat, lon } = selectedCity;
-    const airRes = await fetch(
-      `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=pm10,pm2_5,carbon_monoxide,nitrogen_dioxide,sulphur_dioxide,ozone,us_aqi&timezone=auto`
-    );
-    const airJson = await airRes.json();
+    const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+    const url = new URL('https://air-quality-api.open-meteo.com/v1/air-quality');
+    url.searchParams.append('latitude', lat);
+    url.searchParams.append('longitude', lon);
+    url.searchParams.append('current', 'pm10,pm2_5,carbon_monoxide,nitrogen_dioxide,sulphur_dioxide,ozone,us_aqi');
+    url.searchParams.append('timezone', userTimezone);
+
+    const airRes = await fetch(url.toString());
+
+    if (!airRes.ok) {
+      throw new Error(`server error: ${airRes.status}`);
+    }
+
+    const text = await airRes.text();
+    if (!text) {
+      throw new Error("Received an empty response from the server.");
+    }
+
+    const airJson = JSON.parse(text);
 
     if (!airJson.current) {
-      throw new Error("Current hour data not available");
+      throw new Error("No data found for this location."
+);
     }
 
     setAirData({
@@ -62,16 +80,15 @@ const fetchData = useCallback(async () => {
       o3: airJson.current.ozone,
     });
 
-    notify("success", "Data received successfully");
+    notify("success","Data received successfully");
   } catch (err) {
-    console.error("Data reception failed:", err);
-    notify("error", err.message || "Data reception failed");
+    console.error("Data reception failed :", err);
+    notify("error", "Data reception failed");
     setAirData(null);
   } finally {
     setLoading(false);
   }
 }, [selectedCity]);
-
 
   useEffect(() => {
     fetchData();
@@ -280,27 +297,41 @@ const fetchData = useCallback(async () => {
 
             {selectedCity &&selectedParameter && (
               <Box
-                sx={{
-                  p: { xs: 2, md: 3 },
-                  mx: "auto",
-                  backgroundColor: "#f5faff",
-                  display: "flex",
-                  maxWidth: "1200px",
-                  flexDirection: "column",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  mt: "40px",
-                  borderRadius: "10px",
-                  boxShadow: "0 0 10px 0 rgba(0,0,0,0.2)",
-                }}
+                 sx={{
+              p: { xs: 2, md: 3 },
+              mx: "auto",
+              
+              width: "100%",
+              backgroundColor: "#f5faff",
+              minHeight:'500px',
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "start",
+              mt: 4,
+              borderRadius: "10px",
+              boxShadow: "0 0 10px 0 rgba(0,0,0,0.2)",
+              boxSizing: "border-box",
+              position: "relative",
+            }}
               >
                 <Typography variant="h6" gutterBottom>
                   {selectedParameter.toUpperCase()} - Chart (Last 24h)
                 </Typography>
-                <ParameterChart
+                 <Box
+               sx={{
+                width: "80%",
+                p:'5px 0 ',
+                position: "absolute",
+                top: {xs:'30%',md:'25%'},
+                left:{xs:'48%',md:'50%'},
+                transform: 'translateX(-52%)',
+              }}
+            > <ParameterChart
                   city={selectedCity}
                   parameter={selectedParameter}
-                />
+                /></Box>
+               
                 <Button
                   onClick={() => setSelectedParameter(null)}
                   variant="outlined"
@@ -323,53 +354,3 @@ export default ApiQualityApp;
 
 
 
-
-
-
-
-
-
-
-
-// const fetchData = useCallback(async () => {
-//   if (!selectedCity) return;
-//   setLoading(true);
-//   try {
-//     const { lat, lon } = selectedCity;
-
-//     const airRes = await fetch(
-//       `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&hourly=pm10,pm2_5,carbon_monoxide,nitrogen_dioxide,sulphur_dioxide,ozone,us_aqi`
-//     );
-//     const airJson = await airRes.json();
-
-//     const now = new Date();
-//     const currentUTC = now.toISOString().slice(0, 13); 
-//     console.log("time samples:", airJson.hourly.time.slice(-3));
-//     console.log("currentUTC:", currentUTC);
-//     const timeIndex = airJson.hourly.time.findIndex((time) =>
-//       time.startsWith(currentUTC)
-//     );
-
-//     if (timeIndex === -1) {
-//       throw new Error("Current hour data not available.");
-//     }
-
-//     setAirData({
-//       aqi: airJson.hourly.us_aqi?.[timeIndex],
-//       pm25: airJson.hourly.pm2_5?.[timeIndex],
-//       pm10: airJson.hourly.pm10?.[timeIndex],
-//       co: airJson.hourly.carbon_monoxide?.[timeIndex],
-//       no2: airJson.hourly.nitrogen_dioxide?.[timeIndex],
-//       so2: airJson.hourly.sulphur_dioxide?.[timeIndex],
-//       o3: airJson.hourly.ozone?.[timeIndex],
-//     });
-
-//     notify("success", "Data received successfully");
-//   } catch (err) {
-//     console.error("Data reception failed:", err);
-//     notify("error", "Data reception failed");
-//     setAirData(null);
-//   } finally {
-//     setLoading(false);
-//   }
-// }, [selectedCity]);

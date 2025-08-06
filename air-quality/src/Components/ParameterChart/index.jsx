@@ -9,6 +9,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import Loading from "../Loading";
+import notify from "../../Utils/notify";
 
 const PARAMETER_LABELS = {
   pm2_5: "pm25",
@@ -38,7 +39,8 @@ useEffect(() => {
     try {
       const now = new Date();
       const past24h = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-      
+      const end = new Date(now.getTime() - 60 * 60 * 1000);
+
       const url = `https://air-quality-api.open-meteo.com/v1/air-quality?
         latitude=${city.lat}&
         longitude=${city.lon}&
@@ -46,31 +48,34 @@ useEffect(() => {
         start_date=${past24h.toISOString().split('T')[0]}&
         end_date=${now.toISOString().split('T')[0]}&
         timezone=auto`;
-      
+
       const res = await fetch(url.replace(/\s/g, ''));
       const json = await res.json();
 
       const times = json.hourly.time || [];
       const values = json.hourly[pr] || [];
 
-      const currentHour = now.getHours();
       const chartData = times
         .map((time, i) => ({
-          time: new Date(time).getHours() + ':00', 
+          time: new Date(time).getHours() + ':00',
           value: values[i],
-          fullTime: time 
+          fullTime: time
         }))
         .filter(item => {
           const itemTime = new Date(item.fullTime).getTime();
-          return itemTime >= past24h.getTime() && 
-                 itemTime <= now.getTime() && 
-                 item.value !== null;
+          return (
+            itemTime >= past24h.getTime() &&
+            itemTime <= end.getTime() &&
+            item.value !== null
+          );
         })
         .slice(-24); 
 
       setData(chartData);
+      notify('success',`The chart of ${pr} was displayed successfully`)
     } catch (err) {
       console.error("Error fetching chart data:", err);
+        notify('error','Failed to display the chart')
     } finally {
       setLoading(false);
     }
@@ -78,6 +83,7 @@ useEffect(() => {
 
   fetchChartData();
 }, [city, parameter]);
+
 
   if (loading) return <Loading />;
 
