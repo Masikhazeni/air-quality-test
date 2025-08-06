@@ -64,31 +64,22 @@ const Search = () => {
   setLoading(true);
   try {
     const res = await fetch(
-      `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${coords.lat}&longitude=${coords.lon}&hourly=pm10,pm2_5,carbon_monoxide,nitrogen_dioxide,sulphur_dioxide,ozone,us_aqi`
+      `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${coords.lat}&longitude=${coords.lon}&current=pm10,pm2_5,carbon_monoxide,nitrogen_dioxide,sulphur_dioxide,ozone,us_aqi&timezone=auto`
     );
 
-    const resData = await res.json();
+    const airJson = await res.json();
 
-    const now = new Date();
-    const currentUTC = now.toISOString().slice(0, 13); 
-    const timeIndex = resData.hourly.time.findIndex((time) =>
-      time.startsWith(currentUTC)
-    );
-
-    if (timeIndex === -1) {
-      throw new Error("Current hour data not available.");
-    }
 
     await findCity(coords);
 
     setAirData({
-      aqi: resData.hourly.us_aqi?.[timeIndex],
-      pm25: resData.hourly.pm2_5?.[timeIndex],
-      pm10: resData.hourly.pm10?.[timeIndex],
-      co: resData.hourly.carbon_monoxide?.[timeIndex],
-      no2: resData.hourly.nitrogen_dioxide?.[timeIndex],
-      so2: resData.hourly.sulphur_dioxide?.[timeIndex],
-      o3: resData.hourly.ozone?.[timeIndex],
+     aqi: airJson.current.us_aqi,
+      pm25: airJson.current.pm2_5,
+      pm10: airJson.current.pm10,
+      co: airJson.current.carbon_monoxide,
+      no2: airJson.current.nitrogen_dioxide,
+      so2: airJson.current.sulphur_dioxide,
+      o3: airJson.current.ozone,
     });
 
     notify("success", "Data received successfully");
